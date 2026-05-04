@@ -1,0 +1,1 @@
+# Foodwise-AI-Based-Food-Waste-Reduction-and-Redistribution-System-Using-Predictive-Analytics
