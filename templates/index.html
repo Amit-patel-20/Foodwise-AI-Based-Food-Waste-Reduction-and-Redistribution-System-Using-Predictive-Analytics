@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>FoodWise</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #fff8ef;
+            --panel: #ffffff;
+            --ink: #1f2a1f;
+            --muted: #6b7280;
+            --accent: #d96f32;
+            --accent-dark: #96451a;
+            --soft: #f5decf;
+        }
+
+        body {
+            background:
+                radial-gradient(circle at top left, rgba(217, 111, 50, 0.18), transparent 32%),
+                linear-gradient(180deg, #fff8ef 0%, #f9f3ea 100%);
+            color: var(--ink);
+        }
+
+        .hero {
+            padding: 88px 20px 64px;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.4rem, 6vw, 4.5rem);
+            font-weight: 800;
+        }
+
+        .hero p {
+            max-width: 780px;
+            margin: 16px auto 0;
+            color: var(--muted);
+            font-size: 1.1rem;
+        }
+
+        .shell-card {
+            background: var(--panel);
+            border: 0;
+            border-radius: 24px;
+            box-shadow: 0 18px 45px rgba(95, 63, 35, 0.08);
+        }
+
+        .pill {
+            background: var(--soft);
+            color: var(--accent-dark);
+            border-radius: 999px;
+            display: inline-block;
+            padding: 6px 14px;
+            font-size: 0.92rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg bg-white border-bottom border-light-subtle">
+    <div class="container py-2">
+        <a class="navbar-brand fw-bold" href="/">🌱 FoodWise</a>
+        <div class="ms-auto d-flex gap-2">
+            <a href="/login/" class="btn btn-outline-dark">Login</a>
+            <a href="/register/" class="btn btn-dark">Register</a>
+        </div>
+    </div>
+</nav>
+
+<section class="hero">
+    <div class="container">
+        <span class="pill">AI demand prediction + donation matching</span>
+        <h1 class="mt-3">Prepare smarter. Waste less. Feed more people.</h1>
+        <p>
+            Restaurants, hotels, hostels, canteens, and dhabas can log how much food was prepared and sold today.
+            The system recommends tomorrow's quantity for each item using a Random Forest model and automatically
+            publishes leftover food so NGOs and needy people can request pickup.
+        </p>
+        <div class="mt-4 d-flex justify-content-center gap-3 flex-wrap">
+            <a href="/register/" class="btn btn-dark btn-lg">Start as Food Provider</a>
+            <a href="#donations" class="btn btn-outline-dark btn-lg">See Available Leftovers</a>
+            <a href="{% url 'wedding_donation' %}" class="btn btn-outline-danger btn-lg">Donate Wedding/Event Food</a>
+        </div>
+    </div>
+</section>
+
+<section class="container pb-5" id="donations">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="mb-1">Today's donation board</h2>
+            <p class="text-secondary mb-0">Only closed-day surplus food appears here automatically.</p>
+        </div>
+    </div>
+
+    {% if donations %}
+        <div class="row g-4">
+            {% for donation in donations %}
+                <div class="col-lg-4 col-md-6">
+                    <div class="shell-card h-100 p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h4 class="mb-1">{{ donation.restaurant }}</h4>
+                                <p class="text-secondary mb-0">Available now: {{ donation.total_quantity }} servings</p>
+                                <p class="text-secondary mb-0">
+                                    Location:
+                                    <a
+                                        href="https://www.google.com/maps/search/?api=1&query={{ donation.location|urlencode }}"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >
+                                        {{ donation.location }}
+                                    </a>
+                                </p>
+                            </div>
+                            <span class="pill">Open for pickup</span>
+                        </div>
+
+                        <div class="mb-4">
+                            {% for item in donation.items %}
+                                <div class="d-flex justify-content-between py-2 border-bottom border-light-subtle">
+                                    <span>{{ item.item_name }}</span>
+                                    <strong>{{ item.available_quantity }}</strong>
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <a href="{% url 'request_food' donation.restaurant %}" class="btn btn-dark w-100">
+                            Request Food
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="shell-card p-5 text-center">
+            <h4 class="mb-2">No surplus food is listed right now.</h4>
+            <p class="text-secondary mb-0">Once providers close their day, extra food will appear here automatically.</p>
+        </div>
+    {% endif %}
+</section>
+
+<section class="container pb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="mb-1">Wedding/Event food donations</h2>
+            <p class="text-secondary mb-0">Marriage halls and event organizers can post safe leftover food for direct community pickup.</p>
+        </div>
+        <a href="{% url 'wedding_donation' %}" class="btn btn-dark">Post Wedding/Event Donation</a>
+    </div>
+
+    {% if wedding_donations %}
+        <div class="row g-4">
+            {% for donation in wedding_donations %}
+                <div class="col-lg-4 col-md-6">
+                    <div class="shell-card h-100 p-4">
+                        <h4 class="mb-2">{{ donation.venue_name }}</h4>
+                        <p class="text-secondary mb-1"><strong>Organizer:</strong> {{ donation.organizer_name }}</p>
+                        <p class="text-secondary mb-1">
+                            <strong>Location:</strong>
+                            <a
+                                href="https://www.google.com/maps/search/?api=1&query={{ donation.location|urlencode }}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                {{ donation.location }}
+                            </a>
+                        </p>
+                        <p class="text-secondary mb-1"><strong>Food:</strong> {{ donation.food_description }}</p>
+                        <p class="text-secondary mb-1"><strong>Quantity:</strong> {{ donation.quantity }} servings</p>
+                        <p class="text-secondary mb-3"><strong>Available until:</strong> {{ donation.available_until|default:"Please contact organizer" }}</p>
+                        <a href="tel:{{ donation.contact_phone }}" class="btn btn-outline-dark w-100">
+                            Contact {{ donation.contact_phone }}
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="shell-card p-5 text-center">
+            <h4 class="mb-2">No wedding food donations are listed yet.</h4>
+            <p class="text-secondary mb-0">Use the wedding donation form to post safe leftover food from events.</p>
+        </div>
+    {% endif %}
+</section>
+
+<section class="container pb-5">
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="shell-card p-4 h-100">
+                <h4>1. Add today's menu</h4>
+                <p class="text-secondary mb-0">Enter each food item and how many servings were prepared.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="shell-card p-4 h-100">
+                <h4>2. Close the day</h4>
+                <p class="text-secondary mb-0">Record sold quantity. Waste is calculated automatically per item.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="shell-card p-4 h-100">
+                <h4>3. Predict tomorrow</h4>
+                <p class="text-secondary mb-0">The Random Forest model retrains from your history and improves with use.</p>
+            </div>
+        </div>
+    </div>
+</section>
+</body>
+</html>

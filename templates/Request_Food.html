@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5" style="max-width: 500px;">
+    <div class="card p-4 shadow-sm">
+        <h4 class="mb-2">🍽️ Request Food from {{ restaurant.username }}</h4>
+        <p class="text-muted">
+            Location:
+            <a
+                href="https://www.google.com/maps/search/?api=1&query={{ profile.location|urlencode }}"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                {{ profile.location }}
+            </a>
+        </p>
+
+        {% if available_items %}
+            <div class="mb-3">
+                <h6 class="mb-2">Available items</h6>
+                {% for item in available_items %}
+                    <div class="d-flex justify-content-between py-2 border-bottom border-light-subtle">
+                        <span>{{ item.item_name }}</span>
+                        <strong>{{ item.available_quantity }} servings</strong>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label class="form-label">Your Name</label>
+                    <input type="text" name="name" class="form-control" value="{{ request.POST.name }}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Phone Number</label>
+                    <input type="text" name="phone" class="form-control" value="{{ request.POST.phone }}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Food Item</label>
+                    <select name="item_name" class="form-select" required>
+                        <option value="">Choose an item</option>
+                        {% for item in available_items %}
+                            <option value="{{ item.item_name }}" {% if request.POST.item_name == item.item_name %}selected{% endif %}>
+                                {{ item.item_name }} ({{ item.available_quantity }} servings available)
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Requested Quantity</label>
+                    <input
+                        type="number"
+                        min="1"
+                        name="requested_quantity"
+                        class="form-control"
+                        value="{{ request.POST.requested_quantity }}"
+                        required
+                    >
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Preferred Pickup Time</label>
+                    <input
+                        type="datetime-local"
+                        name="preferred_pickup_time"
+                        class="form-control"
+                        value="{{ request.POST.preferred_pickup_time }}"
+                        required
+                    >
+                </div>
+
+                <button type="submit" class="btn btn-success w-100">
+                    Send Item Request
+                </button>
+            </form>
+        {% else %}
+            <div class="alert alert-warning mb-0">
+                No requestable leftover items are available for this restaurant right now.
+            </div>
+        {% endif %}
+
+        <a href="{% url 'home' %}" class="btn btn-link mt-3">← Back to Home</a>
+    </div>
+</div>
+{% endblock %}

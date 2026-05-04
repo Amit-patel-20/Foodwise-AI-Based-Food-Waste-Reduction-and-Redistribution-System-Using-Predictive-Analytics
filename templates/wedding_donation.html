@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4 p-lg-5">
+                <h2 class="mb-2">Wedding/Event food donation</h2>
+                <p class="text-muted mb-4">Post leftover wedding or event food so needy people and NGOs can contact you directly and collect it quickly.</p>
+
+                <form method="post" class="row g-3">
+                    {% csrf_token %}
+                    <div class="col-md-6">
+                        <label class="form-label">Organizer name</label>
+                        <input type="text" name="organizer_name" class="form-control" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Contact phone</label>
+                        <input type="text" name="contact_phone" class="form-control" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Venue name</label>
+                        <input type="text" name="venue_name" class="form-control" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Location</label>
+                        <input type="text" name="location" class="form-control" placeholder="e.g. Banquet hall area / address" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Approx quantity</label>
+                        <input type="number" min="1" name="quantity" class="form-control" placeholder="Servings" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Available until</label>
+                        <input type="text" name="available_until" class="form-control" placeholder="e.g. Tonight 11:30 PM">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Food details</label>
+                        <textarea name="food_description" class="form-control" rows="4" placeholder="Example: veg biryani, paneer curry, roti, sweets" required></textarea>
+                    </div>
+                    <div class="col-12 d-flex gap-2 flex-wrap">
+                        <button type="submit" class="btn btn-danger">Post Donation</button>
+                        <a href="{% url 'home' %}" class="btn btn-light">Back</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5" style="max-width: 640px;">
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+            <h3 class="mb-3">Schedule Pickup</h3>
+            <p class="text-muted mb-4">Confirm a pickup time for this food request.</p>
+
+            <div class="mb-4">
+                <div class="d-flex justify-content-between py-2 border-bottom border-light-subtle">
+                    <span>Requester</span>
+                    <strong>{{ req.requester_name }}</strong>
+                </div>
+                <div class="d-flex justify-content-between py-2 border-bottom border-light-subtle">
+                    <span>Phone</span>
+                    <strong>{{ req.requester_phone }}</strong>
+                </div>
+                <div class="d-flex justify-content-between py-2 border-bottom border-light-subtle">
+                    <span>Item</span>
+                    <strong>{{ req.item_name|default:"General request" }}</strong>
+                </div>
+                <div class="d-flex justify-content-between py-2 border-bottom border-light-subtle">
+                    <span>Quantity</span>
+                    <strong>{{ req.requested_quantity }} servings</strong>
+                </div>
+                <div class="d-flex justify-content-between py-2">
+                    <span>Preferred pickup</span>
+                    <strong>{{ req.preferred_pickup_time_display|default:"Not shared" }}</strong>
+                </div>
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label">Confirmed Pickup Time</label>
+                    <input
+                        type="datetime-local"
+                        name="scheduled_pickup_time"
+                        class="form-control"
+                        value="{{ req.scheduled_pickup_time|default:req.preferred_pickup_time }}"
+                        required
+                    >
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-success">Save Schedule</button>
+                    <a href="{% url 'restaurant_dashboard' %}" class="btn btn-outline-secondary">Back</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-9">
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4 p-lg-5">
+                <h2 class="mb-2">Today's food preparation</h2>
+                <p class="text-muted mb-4">Add every food item with the quantity prepared today. You can keep this generic for a restaurant, hostel, hotel, or dhaba menu.</p>
+
+                <form method="post" id="food-plan-form">
+                    {% csrf_token %}
+                    <div id="food-rows">
+                        {% if existing_records %}
+                            {% for record in existing_records %}
+                                <div class="row g-3 food-row mb-2">
+                                    <div class="col-md-7">
+                                        <input type="text" name="item_name" class="form-control" value="{{ record.item_name }}" placeholder="Food item name">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="number" min="0" name="prepared_quantity" class="form-control" value="{{ record.prepared_quantity }}" placeholder="Prepared quantity">
+                                    </div>
+                                    <div class="col-md-1 d-grid">
+                                        <button type="button" class="btn btn-outline-danger remove-row">X</button>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            {% for _ in "123" %}
+                                <div class="row g-3 food-row mb-2">
+                                    <div class="col-md-7">
+                                        <input type="text" name="item_name" class="form-control" placeholder="Food item name">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="number" min="0" name="prepared_quantity" class="form-control" placeholder="Prepared quantity">
+                                    </div>
+                                    <div class="col-md-1 d-grid">
+                                        <button type="button" class="btn btn-outline-danger remove-row">X</button>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="d-flex gap-2 flex-wrap mt-4">
+                        <button type="button" class="btn btn-outline-secondary" id="add-row">Add Another Item</button>
+                        <button type="submit" class="btn btn-success">Save Food Plan</button>
+                        <a href="{% url 'restaurant_dashboard' %}" class="btn btn-light">Back</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<template id="food-row-template">
+    <div class="row g-3 food-row mb-2">
+        <div class="col-md-7">
+            <input type="text" name="item_name" class="form-control" placeholder="Food item name">
+        </div>
+        <div class="col-md-4">
+            <input type="number" min="0" name="prepared_quantity" class="form-control" placeholder="Prepared quantity">
+        </div>
+        <div class="col-md-1 d-grid">
+            <button type="button" class="btn btn-outline-danger remove-row">X</button>
+        </div>
+    </div>
+</template>
+
+<script>
+    const rowsContainer = document.getElementById("food-rows");
+    const rowTemplate = document.getElementById("food-row-template");
+
+    document.getElementById("add-row").addEventListener("click", function () {
+        rowsContainer.appendChild(rowTemplate.content.cloneNode(true));
+    });
+
+    document.addEventListener("click", function (event) {
+        if (event.target.classList.contains("remove-row")) {
+            const row = event.target.closest(".food-row");
+            row.remove();
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5" style="max-width: 640px;">
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+            <h3 class="mb-3">📩 Your Food Request Status</h3>
+
+            {% if req.status == "scheduled" %}
+                <div class="alert alert-success mt-3">
+                    ✅ Your pickup is scheduled for <strong>{{ req.scheduled_pickup_time_display }}</strong>.
+                </div>
+            {% elif req.status == "accepted" %}
+                <div class="alert alert-success mt-3">
+                    ✅ Your request was accepted. The restaurant will confirm the pickup time soon.
+                </div>
+            {% elif req.status == "rejected" %}
+                <div class="alert alert-danger mt-3">
+                    ❌ Sorry, your request was rejected by the restaurant.
+                </div>
+            {% else %}
+                <div class="alert alert-warning mt-3">
+                    ⏳ Your request is still pending. Please wait for pickup confirmation.
+                </div>
+            {% endif %}
+
+            <div class="mt-4">
+                <div class="d-flex justify-content-between py-2 border-bottom border-light-subtle">
+                    <span>Restaurant</span>
+                    <strong>{{ req.restaurant.username }}</strong>
+                </div>
+                <div class="d-flex justify-content-between py-2 border-bottom border-light-subtle">
+                    <span>Item</span>
+                    <strong>{{ req.item_name|default:"General request" }}</strong>
+                </div>
+                <div class="d-flex justify-content-between py-2 border-bottom border-light-subtle">
+                    <span>Quantity</span>
+                    <strong>{{ req.requested_quantity }} servings</strong>
+                </div>
+                <div class="d-flex justify-content-between py-2 border-bottom border-light-subtle">
+                    <span>Preferred pickup</span>
+                    <strong>{{ req.preferred_pickup_time_display|default:"Not shared" }}</strong>
+                </div>
+                <div class="d-flex justify-content-between py-2">
+                    <span>Confirmed pickup</span>
+                    <strong>{{ req.scheduled_pickup_time_display|default:"Not scheduled yet" }}</strong>
+                </div>
+            </div>
+
+            <a href="{% url 'home' %}" class="btn btn-secondary mt-4">Back to Home</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

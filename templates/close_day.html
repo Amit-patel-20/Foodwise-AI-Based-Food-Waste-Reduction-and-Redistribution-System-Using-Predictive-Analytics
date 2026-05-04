@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-9">
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4 p-lg-5">
+                <h2 class="mb-2">Close the day</h2>
+                <p class="text-muted mb-4">Enter how much of each prepared item was sold. Waste and donation quantity are calculated automatically.</p>
+
+                {% if today_records %}
+                    <form method="post">
+                        {% csrf_token %}
+                        {% for record in today_records %}
+                            <div class="row g-3 align-items-center mb-3">
+                                <div class="col-md-5">
+                                    <label class="form-label fw-semibold">{{ record.item_name }}</label>
+                                    <input type="hidden" name="item_name" value="{{ record.item_name }}">
+                                    <div class="text-muted small">Prepared: {{ record.prepared_quantity }}</div>
+                                </div>
+                                <div class="col-md-4">
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        max="{{ record.prepared_quantity }}"
+                                        name="sold_quantity"
+                                        class="form-control"
+                                        value="{{ record.sold_quantity }}"
+                                        placeholder="Sold quantity"
+                                    >
+                                </div>
+                                <div class="col-md-3 text-muted small">
+                                    Unsold will be listed for donation.
+                                </div>
+                            </div>
+                        {% endfor %}
+
+                        <div class="d-flex gap-2 flex-wrap mt-4">
+                            <button type="submit" class="btn btn-danger">Close Day</button>
+                            <a href="{% url 'restaurant_dashboard' %}" class="btn btn-light">Back</a>
+                        </div>
+                    </form>
+                {% else %}
+                    <p class="text-muted">Add a food plan first so the system knows what was prepared.</p>
+                    <a href="{% url 'add_food' %}" class="btn btn-success">Add Food Plan</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

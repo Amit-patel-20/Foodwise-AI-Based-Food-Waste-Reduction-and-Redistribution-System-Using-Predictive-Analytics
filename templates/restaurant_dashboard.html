@@ -1,0 +1,355 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+    <div>
+        <h2 class="mb-1">Provider Dashboard</h2>
+        <p class="text-muted mb-0">Manage today's menu, close the day, and generate tomorrow's item-wise prediction.</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="{% url 'add_food' %}" class="btn btn-success">Add Food Plan</a>
+        <a href="{% url 'close_day' %}" class="btn btn-outline-danger">Close Day</a>
+        <a href="{% url 'predict_page' %}" class="btn btn-outline-primary">Predict Tomorrow</a>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h4 class="mb-1">Restaurant location</h4>
+                <p class="text-muted mb-0">
+                    Current location:
+                    <a
+                        href="https://www.google.com/maps/search/?api=1&query={{ profile.location|urlencode }}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        {{ profile.location }}
+                    </a>
+                </p>
+            </div>
+            <form method="post" action="{% url 'update_location' %}" class="d-flex gap-2 flex-wrap">
+                {% csrf_token %}
+                <input type="text" name="location" class="form-control" value="{{ profile.location }}" placeholder="Enter restaurant location">
+                <button type="submit" class="btn btn-outline-dark">Save Location</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% comment %} 
+<div class="row g-4 mb-2">
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                    <div>
+                        <h4 class="mb-1">Prepared vs Sold vs Waste Trend</h4>
+                        <p class="text-muted mb-0">Totals for your most recent closed days.</p>
+                    </div>
+                    <small class="text-muted">Based on closed days only</small>
+                </div>
+
+                {% if prepared_sold_waste_trend_data %}
+                    {{ prepared_sold_waste_trend_data|json_script:"prepared-sold-waste-trend-data" }}
+                    <div style="height: 320px;">
+                        <canvas id="preparedSoldWasteTrendChart"></canvas>
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">Close at least one day to unlock this trend graph.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <div class="mb-3">
+                    <h4 class="mb-1">Daily Waste Trend</h4>
+                    <p class="text-muted mb-0">Track how much food is wasted each closed day.</p>
+                </div>
+
+                {% if daily_waste_trend_data %}
+                    {{ daily_waste_trend_data|json_script:"daily-waste-trend-data" }}
+                    <div style="height: 320px;">
+                        <canvas id="dailyWasteTrendChart"></canvas>
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">Close at least one day to see waste trends.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div> {% endcomment %}
+
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="card h-100 shadow-sm border-0">
+            <div class="card-body">
+                <h4 class="card-title">Today's preparation</h4>
+                {% if planned_records %}
+                    {% for record in planned_records %}
+                        <div class="d-flex justify-content-between py-2 border-bottom border-light-subtle">
+                            <span>{{ record.item_name }}</span>
+                            <strong>{{ record.prepared_quantity }}</strong>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted mb-0">No food plan added yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card h-100 shadow-sm border-0">
+            <div class="card-body">
+                <h4 class="card-title">Closed-day summary</h4>
+                {% if closed_records %}
+                    {% for record in closed_records %}
+                        <div class="py-2 border-bottom border-light-subtle">
+                            <div class="d-flex justify-content-between">
+                                <span>{{ record.item_name }}</span>
+                                <strong>Sold {{ record.sold_quantity }}</strong>
+                            </div>
+                            <small class="text-muted">Waste {{ record.waste_quantity }}</small>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted mb-0">Close the day to compute waste and publish leftovers.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card h-100 shadow-sm border-0">
+            <div class="card-body">
+                <h4 class="card-title">Latest AI suggestions</h4>
+                {% if latest_predictions %}
+                    {% for prediction in latest_predictions %}
+                        <div class="py-2 border-bottom border-light-subtle">
+                            <div class="d-flex justify-content-between">
+                                <span>{{ prediction.item_name }}</span>
+                                <strong>{{ prediction.recommended_quantity }}</strong>
+                            </div>
+                            <small class="text-muted">{{ prediction.model_used }} using {{ prediction.trained_samples }} samples</small>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted mb-0">Predictions appear after at least one closed day.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="row g-4 mb-2 mt-4">
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                    <div>
+                        <h4 class="mb-1">Prepared vs Sold vs Waste Trend</h4>
+                        <p class="text-muted mb-0">Totals for your most recent closed days.</p>
+                    </div>
+                    <small class="text-muted">Based on closed days only</small>
+                </div>
+
+                {% if prepared_sold_waste_trend_data %}
+                    {{ prepared_sold_waste_trend_data|json_script:"prepared-sold-waste-trend-data" }}
+                    <div style="height: 320px;">
+                        <canvas id="preparedSoldWasteTrendChart"></canvas>
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">Close at least one day to unlock this trend graph.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <div class="mb-3">
+                    <h4 class="mb-1">Daily Waste Trend</h4>
+                    <p class="text-muted mb-0">Track how much food is wasted each closed day.</p>
+                </div>
+
+                {% if daily_waste_trend_data %}
+                    {{ daily_waste_trend_data|json_script:"daily-waste-trend-data" }}
+                    <div style="height: 320px;">
+                        <canvas id="dailyWasteTrendChart"></canvas>
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">Close at least one day to see waste trends.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="d-flex justify-content-between align-items-center mt-5 flex-wrap gap-2">
+    <h4 class="mb-0">Food requests</h4>
+    {% if requests %}
+        <a href="{% url 'delete_all_requests' %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete all requests?')">
+            Delete All
+        </a>
+    {% endif %}
+</div>
+
+{% if requests %}
+    <div class="mt-3">
+        {% for req in requests %}
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <div>
+                        <strong>{{ req.requester_name }}</strong> ({{ req.requester_phone }})
+                        {% if req.status == "scheduled" %}
+                            <span class="badge text-bg-success ms-2">{{ req.status }}</span>
+                        {% elif req.status == "rejected" %}
+                            <span class="badge text-bg-danger ms-2">{{ req.status }}</span>
+                        {% else %}
+                            <span class="badge text-bg-secondary ms-2">{{ req.status }}</span>
+                        {% endif %}
+                        <div class="text-muted small mt-2">Item: {{ req.item_name|default:"General request" }}</div>
+                        <div class="text-muted small">Quantity: {{ req.requested_quantity }} servings</div>
+                        <div class="text-muted small">Preferred pickup: {{ req.preferred_pickup_time_display|default:"Not shared" }}</div>
+                        {% if req.scheduled_pickup_time %}
+                            <div class="text-success small">Scheduled pickup: {{ req.scheduled_pickup_time_display }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="d-flex gap-2">
+                        {% if req.status != "rejected" %}
+                            <a href="{% url 'accept_request' req.id %}" class="btn btn-sm btn-success">
+                                {% if req.scheduled_pickup_time %}Reschedule{% else %}Schedule Pickup{% endif %}
+                            </a>
+                            <a href="{% url 'reject_request' req.id %}" class="btn btn-sm btn-danger">Reject</a>
+                        {% endif %}
+                        <a href="{% url 'delete_request' req.id %}" class="btn btn-sm btn-outline-secondary">Delete</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <p class="text-muted mt-3">No pickup requests yet.</p>
+{% endif %}
+
+{% if prepared_sold_waste_trend_data or daily_waste_trend_data %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script>
+        const preparedSoldWasteTrendElement = document.getElementById("prepared-sold-waste-trend-data");
+        const preparedSoldWasteTrendCanvas = document.getElementById("preparedSoldWasteTrendChart");
+        const dailyWasteTrendElement = document.getElementById("daily-waste-trend-data");
+        const dailyWasteTrendCanvas = document.getElementById("dailyWasteTrendChart");
+
+        if (preparedSoldWasteTrendElement && preparedSoldWasteTrendCanvas && window.Chart) {
+            const trendRows = JSON.parse(preparedSoldWasteTrendElement.textContent);
+
+            new Chart(preparedSoldWasteTrendCanvas, {
+                type: "line",
+                data: {
+                    labels: trendRows.map((row) => row.entry_date),
+                    datasets: [
+                        {
+                            label: "Prepared",
+                            data: trendRows.map((row) => row.prepared_quantity),
+                            borderColor: "rgb(25, 135, 84)",
+                            backgroundColor: "rgba(25, 135, 84, 0.15)",
+                            tension: 0.3,
+                            fill: false,
+                        },
+                        {
+                            label: "Sold",
+                            data: trendRows.map((row) => row.sold_quantity),
+                            borderColor: "rgb(13, 110, 253)",
+                            backgroundColor: "rgba(13, 110, 253, 0.15)",
+                            tension: 0.3,
+                            fill: false,
+                        },
+                        {
+                            label: "Waste",
+                            data: trendRows.map((row) => row.waste_quantity),
+                            borderColor: "rgb(220, 53, 69)",
+                            backgroundColor: "rgba(220, 53, 69, 0.18)",
+                            tension: 0.3,
+                            fill: false,
+                        },
+                    ],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: "index",
+                        intersect: false,
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0,
+                            },
+                            title: {
+                                display: true,
+                                text: "Quantity",
+                            },
+                        },
+                    },
+                    plugins: {
+                        legend: {
+                            position: "top",
+                        },
+                    },
+                },
+            });
+        }
+
+        if (dailyWasteTrendElement && dailyWasteTrendCanvas && window.Chart) {
+            const wasteRows = JSON.parse(dailyWasteTrendElement.textContent);
+
+            new Chart(dailyWasteTrendCanvas, {
+                type: "bar",
+                data: {
+                    labels: wasteRows.map((row) => row.entry_date),
+                    datasets: [
+                        {
+                            label: "Waste",
+                            data: wasteRows.map((row) => row.waste_quantity),
+                            backgroundColor: "rgba(220, 53, 69, 0.75)",
+                            borderColor: "rgb(220, 53, 69)",
+                            borderWidth: 1,
+                            borderRadius: 6,
+                        },
+                    ],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0,
+                            },
+                            title: {
+                                display: true,
+                                text: "Waste Quantity",
+                            },
+                        },
+                    },
+                    plugins: {
+                        legend: {
+                            display: false,
+                        },
+                    },
+                },
+            });
+        }
+    </script>
+{% endif %}
+{% endblock %}

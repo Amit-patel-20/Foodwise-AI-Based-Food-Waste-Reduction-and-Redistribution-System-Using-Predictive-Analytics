@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-9">
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4 p-lg-5">
+                <h2 class="mb-2">Tomorrow's food prediction</h2>
+                <p class="text-muted mb-4">This page recommends how much of each item to prepare tomorrow based on your historical prepared, sold, and wasted quantities.</p>
+
+                <form method="post" class="mb-4">
+                    {% csrf_token %}
+                    <button class="btn btn-primary">Generate Item-wise Prediction</button>
+                    <a href="{% url 'restaurant_dashboard' %}" class="btn btn-light ms-2">Back</a>
+                </form>
+
+                {% if prediction_rows %}
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Food item</th>
+                                    <th>Recommended quantity</th>
+                                    <th>Model</th>
+                                    <th>Training samples</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for prediction in prediction_rows %}
+                                    <tr>
+                                        <td>{{ prediction.item_name }}</td>
+                                        <td><strong>{{ prediction.recommended_quantity }}</strong></td>
+                                        <td>{{ prediction.model_used }}</td>
+                                        <td>{{ prediction.trained_samples }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted mb-0">Generate predictions after you have at least one closed day of item-wise food data.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

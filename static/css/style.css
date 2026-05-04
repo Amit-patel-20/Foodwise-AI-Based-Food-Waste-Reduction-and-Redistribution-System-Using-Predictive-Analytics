@@ -1,0 +1,95 @@
+/* ===== Reset & base ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f6f8;
+    color: #333;
+}
+
+/* ===== Navbar ===== */
+.navbar {
+    background: #0b3c49;
+    color: white;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-links a {
+    color: white;
+    text-decoration: none;
+    margin-left: 20px;
+}
+
+.nav-links a:hover {
+    text-decoration: underline;
+}
+
+/* ===== Container ===== */
+.container {
+    padding: 40px;
+    text-align: center;
+}
+
+/* ===== Food Form Card ===== */
+.food-form {
+    width: 450px;
+    margin: 30px auto;
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 0 12px rgba(0,0,0,0.1);
+}
+
+/* ===== Food Rows ===== */
+.food-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.food-row label {
+    font-weight: bold;
+    width: 100px;
+}
+
+.food-row input {
+    width: 250px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* ===== Submit Button ===== */
+.food-form button {
+    width: 100%;
+    padding: 12px;
+    background: #0b3c49;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.food-form button:hover {
+    background: #062a33;
+}
+
+/* ===== Alert Message ===== */
+.alert {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 12px;
+    margin-bottom: 15px;
+    border-radius: 6px;
+    font-weight: bold;
+    text-align: center;
+}
+
